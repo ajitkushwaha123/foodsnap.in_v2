@@ -17,7 +17,7 @@ import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { registerUser, verifyOtp } from "@/helpers";
-import Otp from "@/components/element/otp";
+import Otp from "@/components/element/Otp";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 
