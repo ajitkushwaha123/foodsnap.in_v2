@@ -1,8 +1,6 @@
 import express from "express";
 import { createBullBoard } from "@bull-board/api";
 import { ExpressAdapter } from "@bull-board/express";
-import { Queue } from "bullmq";
-import IORedis from "ioredis";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { productQueue } from "../src/lib/upload-service/queue/productQueue.js";
 

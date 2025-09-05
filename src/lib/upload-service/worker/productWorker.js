@@ -41,7 +41,6 @@ const worker = new Worker(
 
       console.log(imageUrl);
 
-      return;
       if (!imageUrl) throw new Error("S3 upload failed");
 
       const { data } = await axios.post(
