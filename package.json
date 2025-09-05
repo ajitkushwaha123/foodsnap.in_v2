@@ -29,6 +29,8 @@
     "aws-sdk": "^2.1692.0",
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
+    "buffer": "^6.0.3",
+    "Buffer": "^0.0.0",
     "bullmq": "^5.58.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

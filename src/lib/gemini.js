@@ -41,13 +41,27 @@ export function getRandomGeminiClient() {
 const extractValidJsonObjects = (incompleteJson) => {
   try {
     const cleaned = incompleteJson.replace(/```(?:json)?/g, "").trim();
-    const match = cleaned.match(/\{[\s\S]*?\}/);
-    if (!match) throw new Error("No JSON object found");
-    return JSON.parse(match[0]);
+    const matches = [...cleaned.matchAll(/\{[\s\S]*?\}/g)];
+    if (!matches.length) throw new Error("No JSON object found");
+    return JSON.parse(matches[0][0]); 
   } catch (err) {
     console.error("❌ JSON extraction failed:", err.message);
     return null;
   }
+};
+
+const normalizeFoodType = (ft, fallback = "veg") => {
+  if (!ft) return fallback;
+  const map = {
+    veg: "veg",
+    vegetarian: "veg",
+    non_veg: "non_veg",
+    "non-veg": "non_veg",
+    nonveg: "non_veg",
+    egg: "egg",
+    eggetarian: "egg",
+  };
+  return map[ft.toLowerCase()] || fallback;
 };
 
 export const analyzeImageWithGemini = async ({
@@ -102,34 +116,24 @@ Only return a valid JSON object with no extra text, markdown, or explanation.
     ]);
 
     const rawText =
-      result?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
+      result?.response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
     console.log("🧠 Gemini raw response:", rawText);
 
     const extracted = extractValidJsonObjects(rawText);
     if (!extracted) throw new Error("Invalid Gemini output");
 
-    const normalizedFoodType =
-      extracted.food_type?.toLowerCase?.() ?? food_type ?? "veg";
-    const validFoodType = ["veg", "non_veg", "egg"].includes(normalizedFoodType)
-      ? normalizedFoodType
-      : "veg";
-
-    const cleanScore = (val) => {
-      let score = typeof val === "number" ? val : parseFloat(val);
-      if (isNaN(score) || score < 1) return 1;
-      if (score > 10) return 10;
-      return Math.round(score);
-    };
-
     const finalObject = {
       title: extracted.title || title || "Untitled",
       auto_tags: Array.isArray(extracted.auto_tags) ? extracted.auto_tags : [],
       cuisine: extracted.cuisine || "Unknown",
-      quality_score: cleanScore(extracted.quality_score),
+      quality_score: Math.min(
+        Math.max(parseInt(extracted.quality_score) || 1, 1),
+        10
+      ),
       description: extracted.description || description,
       category: extracted.category || category,
       sub_category: extracted.sub_category || sub_category,
-      food_type: validFoodType,
+      food_type: normalizeFoodType(extracted.food_type, food_type || "veg"),
       image_url,
       approved: false,
       system_approved: true,
