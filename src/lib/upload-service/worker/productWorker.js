@@ -44,7 +44,7 @@ const worker = new Worker(
       if (!imageUrl) throw new Error("S3 upload failed");
 
       const { data } = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/library/analyze`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/image/analyze`,
         {
           image_url: imageUrl,
           title,
