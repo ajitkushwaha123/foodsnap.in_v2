@@ -7,3 +7,4 @@ export function createJwtToken(user) {
     { expiresIn: "30m" }
   );
 }
+.

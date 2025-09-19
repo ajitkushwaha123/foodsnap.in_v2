@@ -22,13 +22,14 @@ export const registerUser = async ({ phone }) => {
   }
 };
 
-export const verifyOtp = async ({name , phone, otp }) => {
+export const verifyOtp = async ({ name, phone, otp }) => {
   try {
-    if (!phone || !otp || !name) throw new Error("Phone, OTP and Name are required");
+    if (!phone || !otp || !name)
+      throw new Error("Phone, OTP and Name are required");
 
-    console.log("OTP verification request:", { name , phone, otp });
+    console.log("OTP verification request:", { name, phone, otp });
 
-    const { data } = await axios.post("/api/verify-otp", { name , phone, otp });
+    const { data } = await axios.post("/api/verify-otp", { name, phone, otp });
 
     return {
       success: true,
@@ -50,3 +51,26 @@ export const verifyOtp = async ({name , phone, otp }) => {
 };
 
 export const getUser = async () => {};
+
+export const fetchSubscriptions = async () => {
+  try {
+    const { data } = await axios.get("/api/subscription");
+    return {
+      success: true,
+      data: data.data,
+      message: data.message,
+    };
+  } catch (err) {
+    console.error(
+      "Error fetching subscriptions:",
+      err.response?.data || err.message
+    );
+    return {
+      success: false,
+      error:
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to fetch subscriptions. Please try again.",
+    };
+  }
+};

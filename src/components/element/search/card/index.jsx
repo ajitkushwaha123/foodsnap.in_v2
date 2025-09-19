@@ -1,40 +1,108 @@
 "use client";
 
-import React from "react";
-import { Download, Heart, Eye, Star } from "lucide-react";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Download, Sparkles } from "lucide-react";
+import toast from "react-hot-toast";
+import axios from "axios";
+// import ImageOptions from "../general/image-options";
 
-export default function ImageCard({ image, title, onDownload }) {
+const ImageCard = ({ image, index }) => {
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    try {
+      setDownloading(true);
+
+      const response = await axios.get(
+        `/api/image/download?imageId=${image._id}`,
+        {
+          responseType: "blob",
+          withCredentials: true,
+        }
+      );
+
+      const blobUrl = URL.createObjectURL(response.data);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${image.title || "foodsnap-food-image"}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(blobUrl);
+
+      toast.success("Image downloaded!");
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error("Image download failed.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleReport = () => {
+    toast.success("Reported successfully. Our team will review this image.");
+    // Optionally send API request here to flag the image
+    // axios.post("/api/report", { imageId: image._id });
+  };
+
   return (
-    <div
-      className="group relative overflow-hidden rounded-md bg-muted/40 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-lg"
-      role="article"
+    <motion.figure
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4, delay: index * 0.05 }}
+      className="relative rounded-sm border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900 p-3 shadow-sm hover:shadow-lg transition-all flex flex-col gap-3"
     >
-      <div className="w-full p-2 aspect-[4/3] relative">
+      <div className="relative">
         <img
-          src={image}
-          alt={title}
           loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          src={image.image_url}
+          alt={
+            image.title
+              ? `${image.title} - High Quality Zomato & Swiggy Approved Food Image by Foodsnap`
+              : "Premium food image for restaurant menus - Zomato & Swiggy approved"
+          }
+          className="w-full h-48 object-cover rounded-lg border border-zinc-200 dark:border-white/10"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute top-3 right-3 flex gap-2">
+          <button
+            onClick={handleDownload}
+            aria-label={`Download ${image.title || "food"} image`}
+            className="bg-white/80 dark:bg-black/60 backdrop-blur-sm p-2 rounded-full hover:scale-105 transition-transform"
+          >
+            <Sparkles className="w-5 h-5 text-black dark:text-white" />
+          </button>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDownload?.();
-          }}
-          className="absolute cursor-pointer top-3 right-3 p-2 rounded-full bg-white/90 shadow-md hover:bg-white transition-all opacity-0 group-hover:opacity-100 group-hover:scale-105"
-        >
-          <Download className="h-4 w-4 text-gray-800" />
-        </button>
-      </div>
+          <button
+            onClick={handleDownload}
+            aria-label={`Download ${image.title || "food"} image`}
+            className="bg-white/80 dark:bg-black/60 backdrop-blur-sm p-2 rounded-full hover:scale-105 transition-transform"
+          >
+            {downloading ? (
+              <span className="w-5 h-5 inline-block animate-spin rounded-full border-2 border-t-transparent border-black dark:border-white" />
+            ) : (
+              <Download className="w-5 h-5 text-black dark:text-white" />
+            )}
+          </button>
 
-      <div className="p-3 space-y-2 bg-background">
-        <div>
-          <h3 className="text-sm font-semibold line-clamp-1">{title}</h3>
+          {/* <ImageOptions imageId={image._id} /> */}
         </div>
       </div>
-    </div>
+
+      {image.title && (
+        <figcaption
+          className="text-sm text-gray-600 dark:text-gray-300 mt-1 truncate"
+          title={image.title}
+        >
+          {image.title}
+        </figcaption>
+      )}
+    </motion.figure>
   );
-}
+};
+
+export default ImageCard;

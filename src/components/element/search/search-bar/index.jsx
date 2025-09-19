@@ -6,15 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Search, Loader2, X } from "lucide-react";
 import { useSearch } from "@/store/hooks/useSearch";
 
-export default function SearchBar({ placeholder = "Search..." }) {
+export default function SearchBar({ placeholder = "Search...", onChange }) {
   const [query, setQuery] = useState("");
 
   const { fetchSearchResults, loading, clearSearchError } = useSearch();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!query.trim()) return;
-    fetchSearchResults(query);
+    onChange(query);
   };
 
   const clearSearch = () => {
@@ -49,7 +48,6 @@ export default function SearchBar({ placeholder = "Search..." }) {
         )}
       </div>
 
-      {/* Search button */}
       <Button
         type="submit"
         disabled={loading}
